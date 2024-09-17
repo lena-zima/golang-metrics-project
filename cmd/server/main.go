@@ -18,13 +18,15 @@ type MemStorage struct {
 	counterMetrics map[string]counter
 }
 
-func (storage *MemStorage) updateGauge(name string, value float64) {
+func (storage *MemStorage) addGauge(name string, value float64) {
 	storage.gaugeMetrics[name] = gauge(value)
 }
 
-func (storage *MemStorage) updateCounter(name string, value int64) {
+func (storage *MemStorage) addCounter(name string, value int64) {
 	storage.counterMetrics[name] += counter(value)
 }
+
+
 
 func updateHandler(res http.ResponseWriter, req *http.Request) {
 	if req.Method == http.MethodPost {
@@ -48,7 +50,7 @@ func updateHandler(res http.ResponseWriter, req *http.Request) {
 					return
 				}
 
-				storage.updateGauge(metricName, float64(value))
+				storage.addGauge(metricName, float64(value))
 
 				res.WriteHeader(http.StatusOK)
 
@@ -60,7 +62,7 @@ func updateHandler(res http.ResponseWriter, req *http.Request) {
 					return
 				}
 
-				storage.updateCounter(metricName, int64(value))
+				storage.addCounter(metricName, int64(value))
 
 				res.WriteHeader(http.StatusOK)
 
@@ -78,9 +80,11 @@ func main() {
 	storage.gaugeMetrics = make(map[string]gauge, 0)
 	storage.counterMetrics = make(map[string]counter, 0)
 
-	http.HandleFunc("/update/", updateHandler)
+	mux := http.NewServeMux()
 
-	err := http.ListenAndServe(`:8080`, nil)
+	mux.HandleFunc("/update/", updateHandler)
+
+	err := http.ListenAndServe(`:8080`, mux)
 	if err != nil {
 		panic(err)
 	}
