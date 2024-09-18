@@ -9,7 +9,7 @@ import (
 
 func main() {
 
-	for true {
+	for {
 		time.Sleep(global.PollInterval * time.Second)
 
 		agent.UpdateMetrics()
