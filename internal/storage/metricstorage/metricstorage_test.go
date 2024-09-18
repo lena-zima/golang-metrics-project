@@ -1,4 +1,4 @@
-package metrics_storage
+package metricstorage
 
 import (
 	"testing"
@@ -29,12 +29,12 @@ func TestAddGauge(t *testing.T) {
 	}
 	for _, test := range tests {
 
-		var some_storage MemStorage
+		var someStorage MemStorage
 
-		some_storage.GaugeMetrics = make(map[string]Gauge, 0)
+		someStorage.GaugeMetrics = make(map[string]Gauge, 0)
 
-		some_storage.AddGauge(test.gaugeName, test.gaugeValue)
-		got := float64(some_storage.GaugeMetrics[test.gaugeName])
+		someStorage.AddGauge(test.gaugeName, test.gaugeValue)
+		got := float64(someStorage.GaugeMetrics[test.gaugeName])
 		assert.Equal(t, got, test.result)
 	}
 }

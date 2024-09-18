@@ -5,10 +5,10 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/lena-zima/golang-metrics-project/internal/storage/metrics_storage"
+	"github.com/lena-zima/golang-metrics-project/internal/storage/metricstorage"
 )
 
-var St metrics_storage.MemStorage
+var St metricstorage.MemStorage
 
 var PollCount int64
 var RandomValue = rand.Float64()

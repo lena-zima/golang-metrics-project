@@ -1,4 +1,4 @@
-package metrics_storage
+package metricstorage
 
 // Supported metric types
 type Gauge float64
