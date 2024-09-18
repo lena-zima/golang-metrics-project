@@ -41,6 +41,10 @@ func sendMetric(mtype string, mname string, mvalue reflect.Value) {
 	if err != nil {
 		panic(err)
 	}
-	client.Do(request)
 
+	response, err := client.Do(request)
+	if err != nil {
+		panic(err)
+	}
+	defer response.Body.Close()
 }
