@@ -90,10 +90,10 @@ func (m *Metrics) SendMetrics() {
 
 	metrics := reflect.ValueOf(m)
 
-	metrics_type := reflect.TypeOf(m)
+	metricsType := reflect.TypeOf(m)
 
 	for i := 0; i < metrics.Elem().NumField(); i++ {
-		Mkey := reflect.ValueOf(metrics_type.Elem().Field(i).Name)
+		Mkey := reflect.ValueOf(metricsType.Elem().Field(i).Name)
 		Mvalue := reflect.ValueOf(metrics.Elem().Field(i))
 		if Mkey == reflect.ValueOf("PollCount") {
 			sendMetric("counter", Mkey, Mvalue)

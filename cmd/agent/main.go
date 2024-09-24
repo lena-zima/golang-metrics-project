@@ -24,7 +24,7 @@ func main() {
 
 	// Do agent
 
-	var send_count int
+	var sendCount int
 
 	fmt.Println("test")
 
@@ -36,9 +36,9 @@ func main() {
 
 		m.CollectMetrics()
 
-		send_count++
+		sendCount++
 
-		if send_count%reportCount == 0 {
+		if sendCount%reportCount == 0 {
 			m.SendMetrics()
 		}
 	}

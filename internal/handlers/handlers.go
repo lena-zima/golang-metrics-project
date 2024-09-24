@@ -29,19 +29,33 @@ func GetHandler(repo repository.Repository) http.HandlerFunc {
 			switch metricType {
 			case gauge:
 
-				value := repo.GetGauge(metricName)
+				value, exists, err := repo.GetGauge(metricName)
 
-				w.WriteHeader(http.StatusOK)
+				if exists {
+					w.WriteHeader(http.StatusOK)
+					w.Write([]byte(fmt.Sprintf("%v", value)))
+				} else {
+					w.WriteHeader(http.StatusNotFound)
+				}
 
-				w.Write([]byte(fmt.Sprintf("%v", value)))
+				if err != nil {
+					panic("AA")
+				}
 
 			case counter:
 
-				value := repo.GetCounter(metricName)
+				value, exists, err := repo.GetCounter(metricName)
 
-				w.WriteHeader(http.StatusOK)
+				if exists {
+					w.WriteHeader(http.StatusOK)
+					w.Write([]byte(fmt.Sprintf("%v", value)))
+				} else {
+					w.WriteHeader(http.StatusNotFound)
+				}
 
-				w.Write([]byte(fmt.Sprintf("%v", value)))
+				if err != nil {
+					panic("AA")
+				}
 
 			default:
 				w.WriteHeader(http.StatusBadRequest)

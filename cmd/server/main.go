@@ -10,20 +10,20 @@ import (
 )
 
 func initiateTestMetrics() memstorage.NewMemStorageParams {
-	var test_data memstorage.NewMemStorageParams
+	var testData memstorage.NewMemStorageParams
 
-	test_data.CounterMetrics = map[string]repository.Counter{
+	testData.CounterMetrics = map[string]repository.Counter{
 		/*"test1": 1,
 		"test2": 2,
 		"test3": 3,*/
 	}
 
-	test_data.GaugeMetrics = map[string]repository.Gauge{
+	testData.GaugeMetrics = map[string]repository.Gauge{
 		/*"test123": 1.23,
 		"test234": 2.34,*/
 	}
 
-	return test_data
+	return testData
 }
 
 func main() {
