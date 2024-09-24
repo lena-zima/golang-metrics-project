@@ -16,11 +16,7 @@ const (
 
 func GetAllHandler(repo repository.Repository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		gauges, counters, err := repo.GetAll()
-
-		if err != nil {
-			panic("AA")
-		}
+		gauges, counters := repo.GetAll()
 
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "text/html")
@@ -54,32 +50,24 @@ func GetHandler(repo repository.Repository) http.HandlerFunc {
 			switch metricType {
 			case gauge:
 
-				value, exists, err := repo.GetGauge(metricName)
+				value, exists := repo.GetGauge(metricName)
 
 				if exists {
 					w.WriteHeader(http.StatusOK)
 					w.Write([]byte(fmt.Sprintf("%v", value)))
 				} else {
 					w.WriteHeader(http.StatusNotFound)
-				}
-
-				if err != nil {
-					panic("AA")
 				}
 
 			case counter:
 
-				value, exists, err := repo.GetCounter(metricName)
+				value, exists := repo.GetCounter(metricName)
 
 				if exists {
 					w.WriteHeader(http.StatusOK)
 					w.Write([]byte(fmt.Sprintf("%v", value)))
 				} else {
 					w.WriteHeader(http.StatusNotFound)
-				}
-
-				if err != nil {
-					panic("AA")
 				}
 
 			default:

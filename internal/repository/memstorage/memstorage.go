@@ -45,20 +45,20 @@ func NewMemStorage(ctx context.Context, p *NewMemStorageParams) (*MemStorage, er
 	return &storage, nil
 }
 
-func (storage *MemStorage) GetAll() (map[string]repository.Gauge, map[string]repository.Counter, error) {
-	return storage.GaugeMetrics, storage.CounterMetrics, nil
+func (storage *MemStorage) GetAll() (map[string]repository.Gauge, map[string]repository.Counter) {
+	return storage.GaugeMetrics, storage.CounterMetrics
 }
 
 // Get gauge metric by name
-func (storage *MemStorage) GetGauge(name string) (repository.Gauge, bool, error) {
+func (storage *MemStorage) GetGauge(name string) (repository.Gauge, bool) {
 	value, exists := storage.GaugeMetrics[name]
-	return value, exists, nil
+	return value, exists
 }
 
 // Get counter metric by name
-func (storage *MemStorage) GetCounter(name string) (repository.Counter, bool, error) {
+func (storage *MemStorage) GetCounter(name string) (repository.Counter, bool) {
 	value, exists := storage.CounterMetrics[name]
-	return value, exists, nil
+	return value, exists
 }
 
 // Create or update gauge metric
