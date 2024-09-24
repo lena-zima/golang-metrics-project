@@ -107,10 +107,21 @@ func PostHandler(repo repository.Repository) http.HandlerFunc {
 			metricValue = chi.URLParam(r, "metricValue")
 		)
 
-		if metricType == "" {
-			w.WriteHeader(http.StatusNotFound)
+		if metricType != gauge && metricType != counter {
+			http.Error(w, "Unknown metric type", http.StatusNotImplemented)
 			return
 		}
+
+		if metricName == "" {
+			http.Error(w, "Unknown metric name", http.StatusNotFound)
+			return
+		}
+
+		if metricValue == "" {
+			http.Error(w, "Empty metric value", http.StatusNotFound)
+			return
+		}
+
 		switch metricType {
 		case gauge:
 			value, err := strconv.ParseFloat(metricValue, 64)
