@@ -16,7 +16,7 @@ const (
 
 func GetHandler(repo repository.Repository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Parse URL
+
 		var (
 			metricType = chi.URLParam(r, "metricType")
 			metricName = chi.URLParam(r, "metricName")
@@ -69,14 +69,12 @@ func PostHandler(repo repository.Repository) http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		// Parse URL
 		var (
 			metricType  = chi.URLParam(r, "metricType")
 			metricName  = chi.URLParam(r, "metricName")
 			metricValue = chi.URLParam(r, "metricValue")
 		)
 
-		// Check URL
 		if metricType == "" {
 			w.WriteHeader(http.StatusNotFound)
 			return

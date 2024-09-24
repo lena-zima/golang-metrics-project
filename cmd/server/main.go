@@ -12,16 +12,9 @@ import (
 func initiateTestMetrics() memstorage.NewMemStorageParams {
 	var testData memstorage.NewMemStorageParams
 
-	testData.CounterMetrics = map[string]repository.Counter{
-		/*"test1": 1,
-		"test2": 2,
-		"test3": 3,*/
-	}
+	testData.CounterMetrics = map[string]repository.Counter{}
 
-	testData.GaugeMetrics = map[string]repository.Gauge{
-		/*"test123": 1.23,
-		"test234": 2.34,*/
-	}
+	testData.GaugeMetrics = map[string]repository.Gauge{}
 
 	return testData
 }
@@ -35,6 +28,7 @@ func main() {
 	var repo, _ = memstorage.NewMemStorage(context.TODO(), &testData)
 
 	// Step 2. Get Config
+	// TODO
 
 	// Step 3. Start Server
 

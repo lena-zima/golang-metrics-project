@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/lena-zima/golang-metrics-project/internal/metric"
@@ -17,22 +16,21 @@ const (
 
 func main() {
 
-	// Initiate metrics
+	// Step 1. Initiate metrics
 	var m metric.Metrics
 
-	// Initiate Config
+	// Step 2. Initiate Config
+	// TODO
 
-	// Do agent
+	// Step 3. Operate metrics
 
+	// Variable which defines when to send metrics
 	var sendCount int
 
-	fmt.Println("test")
-
+	// Cycle to collect and send metrics
 	for {
 
 		time.Sleep(pollInterval * time.Second)
-
-		//fmt.Println("test")
 
 		m.CollectMetrics()
 
