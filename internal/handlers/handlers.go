@@ -14,6 +14,31 @@ const (
 	counter = "counter"
 )
 
+func GetAllHandler(repo repository.Repository) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		gauges, counters, err := repo.GetAll()
+
+		if err != nil {
+			panic("AA")
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Header().Set("Content-Type", "text/html")
+		w.Write([]byte("<html><body><h1>Metrics</h1><ul>"))
+
+		for k, v := range gauges {
+			w.Write([]byte(fmt.Sprintf("<li>Gauge: %s = %g</li>", k, v)))
+		}
+
+		for k, v := range counters {
+			w.Write([]byte(fmt.Sprintf("<li>Counter: %s = %d</li>", k, v)))
+		}
+
+		w.Write([]byte("</ul></body></html>"))
+
+	}
+}
+
 func GetHandler(repo repository.Repository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
