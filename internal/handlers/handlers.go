@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -12,6 +13,43 @@ const (
 	gauge   = "gauge"
 	counter = "counter"
 )
+
+func GetHandler(repo repository.Repository) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Parse URL
+		var (
+			metricType = chi.URLParam(r, "metricType")
+			metricName = chi.URLParam(r, "metricName")
+		)
+
+		if metricType == "" {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		} else {
+			switch metricType {
+			case gauge:
+
+				value := repo.GetGauge(metricName)
+
+				w.WriteHeader(http.StatusOK)
+
+				w.Write([]byte(fmt.Sprintf("%v", value)))
+
+			case counter:
+
+				value := repo.GetCounter(metricName)
+
+				w.WriteHeader(http.StatusOK)
+
+				w.Write([]byte(fmt.Sprintf("%v", value)))
+
+			default:
+				w.WriteHeader(http.StatusBadRequest)
+			}
+		}
+
+	}
+}
 
 func PostHandler(repo repository.Repository) http.HandlerFunc {
 

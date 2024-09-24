@@ -32,7 +32,7 @@ func main() {
 
 		time.Sleep(pollInterval * time.Second)
 
-		fmt.Println("test")
+		//fmt.Println("test")
 
 		m.CollectMetrics()
 

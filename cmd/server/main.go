@@ -30,9 +30,9 @@ func main() {
 
 	// Step 1. Initiate Repo storage
 
-	var test_data = initiateTestMetrics()
+	var testData = initiateTestMetrics()
 
-	var repo, _ = memstorage.NewMemStorage(context.TODO(), &test_data)
+	var repo, _ = memstorage.NewMemStorage(context.TODO(), &testData)
 
 	// Step 2. Get Config
 
