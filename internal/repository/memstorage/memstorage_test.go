@@ -1,8 +1,9 @@
-package metricstorage
+package memstorage
 
 import (
 	"testing"
 
+	"github.com/lena-zima/golang-metrics-project/internal/repository"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -11,8 +12,8 @@ func TestAddGauge(t *testing.T) {
 	tests := []struct {
 		name       string
 		gaugeName  string
-		gaugeValue float64
-		result     float64
+		gaugeValue repository.Gauge
+		result     repository.Gauge
 	}{
 		{
 			name:       "Test simple gauge 1",
@@ -31,9 +32,9 @@ func TestAddGauge(t *testing.T) {
 
 		var someStorage MemStorage
 
-		someStorage.GaugeMetrics = make(map[string]Gauge, 0)
+		someStorage.GaugeMetrics = make(map[string]repository.Gauge, 0)
 
-		someStorage.AddGauge(test.gaugeName, test.gaugeValue)
+		someStorage.PostGauge(test.gaugeName, test.gaugeValue)
 		got := float64(someStorage.GaugeMetrics[test.gaugeName])
 		assert.Equal(t, got, test.result)
 	}

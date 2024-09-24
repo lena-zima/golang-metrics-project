@@ -3,18 +3,46 @@ package main
 import (
 	"net/http"
 
-	"github.com/lena-zima/golang-metrics-project/global"
-	"github.com/lena-zima/golang-metrics-project/internal/server"
-	"github.com/lena-zima/golang-metrics-project/internal/storage/metricstorage"
+	"github.com/lena-zima/golang-metrics-project/internal/repository"
+	"github.com/lena-zima/golang-metrics-project/internal/repository/memstorage"
+	"github.com/lena-zima/golang-metrics-project/internal/router"
 )
+
+func initiate_test_metrics() memstorage.NewMemStorageParams {
+	var test_data memstorage.NewMemStorageParams
+
+	test_data.CounterMetrics = map[string]repository.Counter{
+		"test1": 1,
+		"test2": 2,
+		"test3": 3,
+	}
+
+	test_data.GaugeMetrics = map[string]repository.Gauge{
+		"test123": 1.23,
+		"test234": 2.34,
+	}
+
+	return test_data
+}
 
 func main() {
 
-	global.St.GaugeMetrics = make(map[string]metricstorage.Gauge, 0)
-	global.St.CounterMetrics = make(map[string]metricstorage.Counter, 0)
+	// Step 1. Initiate Repo storage
 
-	err := http.ListenAndServe(`:8080`, server.StartServer())
+	var test_data = initiate_test_metrics()
+
+	var repo, _ = memstorage.NewMemStorage(nil, &test_data)
+
+	// Step 2. Get Config
+
+	// Step 3. Start Server
+
+	r := router.StartServer(repo)
+
+	err := http.ListenAndServe(`:8080`, r)
+
 	if err != nil {
 		panic(err)
 	}
+
 }

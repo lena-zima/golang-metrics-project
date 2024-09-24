@@ -3,53 +3,60 @@ package handlers
 import (
 	"net/http"
 	"strconv"
-	"strings"
 
-	"github.com/lena-zima/golang-metrics-project/global"
+	"github.com/go-chi/chi/v5"
+	"github.com/lena-zima/golang-metrics-project/internal/repository"
 )
 
-func UpdateHandler(res http.ResponseWriter, req *http.Request) {
-	if req.Method == http.MethodPost {
-		s := strings.Split(req.URL.Path, "/update/")
-		metricInput := strings.Split(s[1], "/")
+const (
+	gauge   = "gauge"
+	counter = "counter"
+)
 
-		if len(metricInput) != 3 {
-			res.WriteHeader(http.StatusNotFound)
+func PostHandler(repo repository.Repository) http.HandlerFunc {
+
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		// Parse URL
+		var (
+			metricType  = chi.URLParam(r, "metricType")
+			metricName  = chi.URLParam(r, "metricName")
+			metricValue = chi.URLParam(r, "metricValue")
+		)
+
+		// Check URL
+		if metricType == "" {
+			w.WriteHeader(http.StatusNotFound)
 			return
 		} else {
-			metricType := metricInput[0]
-			metricName := metricInput[1]
-			metricValue := metricInput[2]
-
 			switch metricType {
-			case "gauge":
+			case gauge:
 				value, err := strconv.ParseFloat(metricValue, 64)
 
 				if err != nil {
-					res.WriteHeader(http.StatusBadRequest)
+					w.WriteHeader(http.StatusBadRequest)
 					return
 				}
 
-				global.St.AddGauge(metricName, float64(value))
+				repo.PostGauge(metricName, repository.Gauge(value))
 
-				res.WriteHeader(http.StatusOK)
+				w.WriteHeader(http.StatusOK)
 
-			case "counter":
-				value, err := strconv.Atoi(metricValue)
+			case counter:
+				value, err := strconv.ParseInt(metricValue, 10, 64)
 
 				if err != nil {
-					res.WriteHeader(http.StatusBadRequest)
+					w.WriteHeader(http.StatusBadRequest)
 					return
 				}
 
-				global.St.AddCounter(metricName, int64(value))
+				repo.PostCounter(metricName, repository.Counter(value))
 
-				res.WriteHeader(http.StatusOK)
+				w.WriteHeader(http.StatusOK)
 
 			default:
-				res.WriteHeader(http.StatusBadRequest)
+				w.WriteHeader(http.StatusBadRequest)
 			}
-
 		}
 	}
 
