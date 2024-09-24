@@ -3,7 +3,7 @@ package main
 import (
 	"time"
 
-	"github.com/lena-zima/golang-metrics-project/internal/metric"
+	"github.com/lena-zima/golang-metrics-project/internal/agent"
 )
 
 const (
@@ -17,7 +17,7 @@ const (
 func main() {
 
 	// Step 1. Initiate metrics
-	var m metric.Metrics
+	var m agent.Metrics
 
 	// Step 2. Initiate Config
 	// TODO

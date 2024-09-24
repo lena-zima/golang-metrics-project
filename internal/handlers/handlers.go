@@ -16,7 +16,12 @@ const (
 
 func GetAllHandler(repo repository.Repository) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		gauges, counters := repo.GetAll()
+		gauges, counters, err := repo.GetAll()
+
+		if err != nil {
+			http.Error(w, "Failed to get metrics from store", http.StatusInternalServerError)
+			return
+		}
 
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "text/html")
@@ -46,33 +51,47 @@ func GetHandler(repo repository.Repository) http.HandlerFunc {
 		if metricType == "" {
 			w.WriteHeader(http.StatusNotFound)
 			return
-		} else {
-			switch metricType {
-			case gauge:
+		}
 
-				value, exists := repo.GetGauge(metricName)
+		switch metricType {
+		case gauge:
 
-				if exists {
-					w.WriteHeader(http.StatusOK)
-					w.Write([]byte(fmt.Sprintf("%v", value)))
-				} else {
-					w.WriteHeader(http.StatusNotFound)
-				}
+			value, err := repo.GetGauge(metricName)
 
-			case counter:
-
-				value, exists := repo.GetCounter(metricName)
-
-				if exists {
-					w.WriteHeader(http.StatusOK)
-					w.Write([]byte(fmt.Sprintf("%v", value)))
-				} else {
-					w.WriteHeader(http.StatusNotFound)
-				}
-
-			default:
-				w.WriteHeader(http.StatusBadRequest)
+			if err != nil {
+				http.Error(w, "Failed to get metric from store", http.StatusInternalServerError)
+				return
 			}
+
+			if value == nil {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(fmt.Sprintf("%v", *value)))
+			return
+
+		case counter:
+
+			value, err := repo.GetCounter(metricName)
+
+			if err != nil {
+				http.Error(w, "Failed to get metric from store", http.StatusInternalServerError)
+				return
+			}
+
+			if value == nil {
+				w.WriteHeader(http.StatusNotFound)
+				return
+			}
+
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(fmt.Sprintf("%v", *value)))
+			return
+
+		default:
+			w.WriteHeader(http.StatusBadRequest)
 		}
 
 	}
@@ -91,35 +110,34 @@ func PostHandler(repo repository.Repository) http.HandlerFunc {
 		if metricType == "" {
 			w.WriteHeader(http.StatusNotFound)
 			return
-		} else {
-			switch metricType {
-			case gauge:
-				value, err := strconv.ParseFloat(metricValue, 64)
+		}
+		switch metricType {
+		case gauge:
+			value, err := strconv.ParseFloat(metricValue, 64)
 
-				if err != nil {
-					w.WriteHeader(http.StatusBadRequest)
-					return
-				}
-
-				repo.PostGauge(metricName, repository.Gauge(value))
-
-				w.WriteHeader(http.StatusOK)
-
-			case counter:
-				value, err := strconv.ParseInt(metricValue, 10, 64)
-
-				if err != nil {
-					w.WriteHeader(http.StatusBadRequest)
-					return
-				}
-
-				repo.PostCounter(metricName, repository.Counter(value))
-
-				w.WriteHeader(http.StatusOK)
-
-			default:
+			if err != nil {
 				w.WriteHeader(http.StatusBadRequest)
+				return
 			}
+
+			repo.PostGauge(metricName, repository.Gauge(value))
+
+			w.WriteHeader(http.StatusOK)
+
+		case counter:
+			value, err := strconv.ParseInt(metricValue, 10, 64)
+
+			if err != nil {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+
+			repo.PostCounter(metricName, repository.Counter(value))
+
+			w.WriteHeader(http.StatusOK)
+
+		default:
+			w.WriteHeader(http.StatusBadRequest)
 		}
 	}
 
