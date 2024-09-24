@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"net/http"
 
 	"github.com/lena-zima/golang-metrics-project/internal/repository"
@@ -8,7 +9,7 @@ import (
 	"github.com/lena-zima/golang-metrics-project/internal/router"
 )
 
-func initiate_test_metrics() memstorage.NewMemStorageParams {
+func initiateTestMetrics() memstorage.NewMemStorageParams {
 	var test_data memstorage.NewMemStorageParams
 
 	test_data.CounterMetrics = map[string]repository.Counter{
@@ -29,9 +30,9 @@ func main() {
 
 	// Step 1. Initiate Repo storage
 
-	var test_data = initiate_test_metrics()
+	//var test_data = initiateTestMetrics()
 
-	var repo, _ = memstorage.NewMemStorage(nil, &test_data)
+	var repo, _ = memstorage.NewMemStorage(context.TODO(), nil)
 
 	// Step 2. Get Config
 
