@@ -13,14 +13,14 @@ func initiateTestMetrics() memstorage.NewMemStorageParams {
 	var test_data memstorage.NewMemStorageParams
 
 	test_data.CounterMetrics = map[string]repository.Counter{
-		"test1": 1,
+		/*"test1": 1,
 		"test2": 2,
-		"test3": 3,
+		"test3": 3,*/
 	}
 
 	test_data.GaugeMetrics = map[string]repository.Gauge{
-		"test123": 1.23,
-		"test234": 2.34,
+		/*"test123": 1.23,
+		"test234": 2.34,*/
 	}
 
 	return test_data
@@ -30,9 +30,9 @@ func main() {
 
 	// Step 1. Initiate Repo storage
 
-	//var test_data = initiateTestMetrics()
+	var test_data = initiateTestMetrics()
 
-	var repo, _ = memstorage.NewMemStorage(context.TODO(), nil)
+	var repo, _ = memstorage.NewMemStorage(context.TODO(), &test_data)
 
 	// Step 2. Get Config
 
