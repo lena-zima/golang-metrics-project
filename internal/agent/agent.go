@@ -56,7 +56,7 @@ func (a *agent) RunJob() {
 		err := collectMetrics(m)
 
 		if err != nil {
-			fmt.Errorf("failed to get agent metrics", err)
+			log.Printf("failed to get agent metrics: %e", err)
 		}
 
 		sendCount++
