@@ -4,14 +4,16 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
-
-	//"net/http"
 	"reflect"
 	"runtime"
 )
 
 type gauge float64
 type counter int64
+
+const (
+	update = "/update/"
+)
 
 type Metrics struct {
 	//Runtime
@@ -86,7 +88,7 @@ func (m *Metrics) CollectMetrics() error {
 	return nil
 }
 
-func (m *Metrics) SendMetrics() {
+func (m *Metrics) SendMetrics() error {
 
 	metrics := reflect.ValueOf(m)
 
@@ -94,20 +96,25 @@ func (m *Metrics) SendMetrics() {
 
 	for i := 0; i < metrics.Elem().NumField(); i++ {
 		Mkey := reflect.ValueOf(metricsType.Elem().Field(i).Name)
-		Mvalue := reflect.ValueOf(metrics.Elem().Field(i))
-		if Mkey == reflect.ValueOf("PollCount") {
+		Mvalue := metrics.Elem().Field(i)
+		Mtype := reflect.ValueOf(metrics.Elem().Field(i).Type().Name())
+
+		switch fmt.Sprint(Mtype) {
+		case "counter":
 			sendMetric("counter", Mkey, Mvalue)
-		} else {
+		case "gauge":
 			sendMetric("gauge", Mkey, Mvalue)
 		}
 	}
+
+	return nil
 }
 
 func sendMetric(mtype string, mname reflect.Value, mvalue reflect.Value) {
 
 	client := &http.Client{}
 
-	url := fmt.Sprint("http://localhost:8080/update/", mtype, "/", mname, "/", mvalue)
+	url := fmt.Sprint("http://localhost:8080", update, mtype, "/", mname, "/", mvalue)
 
 	request, err := http.NewRequest(http.MethodPost, url, nil)
 	if err != nil {
