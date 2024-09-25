@@ -1,8 +1,6 @@
 package agentconfig
 
 import (
-	"time"
-
 	"github.com/lena-zima/golang-metrics-project/internal/repository"
 )
 
@@ -11,8 +9,8 @@ type counter repository.Counter
 
 type AgentConfig struct {
 	Metrics        *Metrics
-	PollInterval   time.Duration
-	ReportInterval time.Duration
+	PollInterval   int
+	ReportInterval int
 	ServerAddr     string
 }
 
@@ -51,13 +49,14 @@ type Metrics struct {
 	RandomValue repository.Gauge
 }
 
-func GetConfig() (*AgentConfig, error) {
+func GetConfig(serv string, rep, poll int) (*AgentConfig, error) {
 
 	var conf AgentConfig
+
 	conf.Metrics = initializeMetrics()
-	conf.PollInterval = 2
-	conf.ReportInterval = 10
-	conf.ServerAddr = "http://localhost:8080"
+	conf.PollInterval = poll
+	conf.ReportInterval = rep
+	conf.ServerAddr = serv
 
 	return &conf, nil
 }

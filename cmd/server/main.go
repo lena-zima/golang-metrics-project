@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"log"
 
 	"github.com/lena-zima/golang-metrics-project/config/serverconfig"
@@ -9,18 +10,22 @@ import (
 
 func main() {
 
-	conf, err := serverconfig.GetConfig()
+	srvAddr := flag.String("a", "localhost:8080", "server endpoint address")
+
+	flag.Parse()
+
+	conf, err := serverconfig.GetConfig(*srvAddr)
 
 	if err != nil {
 		log.Fatalf("failed to get server config %e", err)
 	}
 
-	r, err := router.NewServer(conf)
+	serv, err := router.NewServer(conf)
 
 	if err != nil {
 		log.Fatalf("failed to create a server %e", err)
 	}
 
-	router.StartServer(r)
+	serv.StartServer()
 
 }

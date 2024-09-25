@@ -11,13 +11,16 @@ import (
 )
 
 type server struct {
-	repo repository.Repository
+	repo    repository.Repository
+	addr    string
+	handler *chi.Mux
 }
 
-func NewServer(conf *serverconfig.ServerConfig) (*chi.Mux, error) {
+func NewServer(conf *serverconfig.ServerConfig) (*server, error) {
 
 	var serv server
 	serv.repo = conf.Repo
+	serv.addr = conf.ServAddr
 
 	r := chi.NewRouter()
 
@@ -25,12 +28,14 @@ func NewServer(conf *serverconfig.ServerConfig) (*chi.Mux, error) {
 	r.Get("/value/{metricType}/{metricName}", handlers.GetHandler(serv.repo))
 	r.Post("/update/{metricType}/{metricName}/{metricValue}", handlers.PostHandler(serv.repo))
 
-	return r, nil
+	serv.handler = r
+
+	return &serv, nil
 }
 
-func StartServer(r *chi.Mux) error {
+func (serv *server) StartServer() error {
 
-	err := http.ListenAndServe(`:8080`, r)
+	err := http.ListenAndServe(serv.addr, serv.handler)
 
 	if err != nil {
 		log.Printf("failed to get server config: %e", err)

@@ -23,8 +23,8 @@ const (
 
 type agent struct {
 	metrics        *agentconfig.Metrics
-	pollInterval   time.Duration
-	reportInterval time.Duration
+	pollInterval   int
+	reportInterval int
 	serverAddr     string
 }
 
@@ -50,8 +50,7 @@ func (a *agent) RunJob() {
 
 	// Cycle to collect and send metrics
 	for {
-
-		time.Sleep(a.pollInterval * time.Second)
+		time.Sleep(time.Second * time.Duration(a.pollInterval))
 
 		err := collectMetrics(m)
 

@@ -8,16 +8,18 @@ import (
 )
 
 type ServerConfig struct {
-	Repo repository.Repository
+	Repo     repository.Repository
+	ServAddr string
 }
 
-func GetConfig() (*ServerConfig, error) {
+func GetConfig(serv string) (*ServerConfig, error) {
 
 	var conf ServerConfig
 
 	var repo, err = memstorage.NewMemStorage()
 
 	conf.Repo = repo
+	conf.ServAddr = serv
 
 	if err != nil {
 		log.Printf("err while repo creation: %e", err)
