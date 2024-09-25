@@ -1,6 +1,7 @@
 package router
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -27,11 +28,14 @@ func NewServer(conf *serverconfig.ServerConfig) (*chi.Mux, error) {
 	return r, nil
 }
 
-func StartServer(r *chi.Mux) {
+func StartServer(r *chi.Mux) error {
 
 	err := http.ListenAndServe(`:8080`, r)
 
 	if err != nil {
-		panic("AA")
+		log.Printf("failed to get server config: ", err)
+		return err
 	}
+
+	return nil
 }

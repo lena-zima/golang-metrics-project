@@ -1,6 +1,8 @@
 package serverconfig
 
 import (
+	"log"
+
 	"github.com/lena-zima/golang-metrics-project/internal/repository"
 	"github.com/lena-zima/golang-metrics-project/internal/repository/memstorage"
 )
@@ -9,7 +11,7 @@ type ServerConfig struct {
 	Repo repository.Repository
 }
 
-func GetConfig() *ServerConfig {
+func GetConfig() (*ServerConfig, error) {
 
 	var conf ServerConfig
 
@@ -18,8 +20,9 @@ func GetConfig() *ServerConfig {
 	conf.Repo = repo
 
 	if err != nil {
-		panic("AA")
+		log.Printf("err while repo creation: ", err)
+		return nil, err
 	}
 
-	return &conf
+	return &conf, nil
 }

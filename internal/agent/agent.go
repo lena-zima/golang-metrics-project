@@ -2,6 +2,7 @@ package agent
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"net/http"
 	"reflect"
@@ -55,7 +56,7 @@ func (a *agent) RunJob() {
 		err := collectMetrics(m)
 
 		if err != nil {
-			panic("AA")
+			fmt.Errorf("failed to get agent metrics", err)
 		}
 
 		sendCount++
@@ -118,7 +119,7 @@ func sendMetrics(m *agentconfig.Metrics) error {
 		err := sendMetric(Mtype, Mkey, Mvalue)
 
 		if err != nil {
-			//
+			log.Printf("failed to send metric: ", err)
 			return err
 		}
 
@@ -133,17 +134,15 @@ func sendMetric(mtype reflect.Value, mname reflect.Value, mvalue reflect.Value) 
 
 	url := fmt.Sprint("http://localhost:8080", update, mtype, "/", mname, "/", mvalue)
 
-	fmt.Println(url)
-
 	request, err := http.NewRequest(http.MethodPost, url, nil)
 	if err != nil {
-		//
+		log.Printf("failed to send request to server: ", err)
 		return err
 	}
 
 	response, err := client.Do(request)
 	if err != nil {
-		//
+		log.Printf("failed to send request to server: ", err)
 		return err
 	}
 	defer response.Body.Close()

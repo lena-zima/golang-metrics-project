@@ -1,14 +1,24 @@
 package main
 
 import (
+	"log"
+
 	"github.com/lena-zima/golang-metrics-project/config/agentconfig"
 	"github.com/lena-zima/golang-metrics-project/internal/agent"
 )
 
 func main() {
-	conf := agentconfig.GetConfig()
+	conf, err := agentconfig.GetConfig()
 
-	a, _ := agent.NewAgent(conf)
+	if err != nil {
+		log.Fatalf("failed to get agent config", err)
+	}
+
+	a, err := agent.NewAgent(conf)
+
+	if err != nil {
+		log.Fatalf("failed to create agent", err)
+	}
 
 	a.RunJob()
 

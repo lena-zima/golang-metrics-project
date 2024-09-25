@@ -51,7 +51,7 @@ type Metrics struct {
 	RandomValue repository.Gauge
 }
 
-func GetConfig() *AgentConfig {
+func GetConfig() (*AgentConfig, error) {
 
 	var conf AgentConfig
 	conf.Metrics = initializeMetrics()
@@ -59,7 +59,7 @@ func GetConfig() *AgentConfig {
 	conf.ReportInterval = 10
 	conf.ServerAddr = "http://localhost:8080"
 
-	return &conf
+	return &conf, nil
 }
 
 func initializeMetrics() *Metrics {
