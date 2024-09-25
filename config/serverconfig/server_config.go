@@ -1,11 +1,14 @@
 package serverconfig
 
 type ServerConfig struct {
+	//TODO
 }
 
 func GetConfig() *ServerConfig {
 
-	var conf *ServerConfig
+	var conf ServerConfig
 
-	return conf
+	//TODO
+
+	return &conf
 }

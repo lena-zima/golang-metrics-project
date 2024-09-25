@@ -6,89 +6,105 @@ import (
 	"net/http"
 	"reflect"
 	"runtime"
+	"time"
+
+	"github.com/lena-zima/golang-metrics-project/config/agentconfig"
+	"github.com/lena-zima/golang-metrics-project/internal/repository"
 )
 
-type gauge float64
-type counter int64
+type gauge repository.Gauge
+type counter repository.Counter
 
 const (
-	update = "/update/"
+	update             = "/update/"
+	ContentType string = "text/plain"
 )
 
-type Metrics struct {
-	//Runtime
-	Alloc         gauge
-	BuckHashSys   gauge
-	Frees         gauge
-	GCCPUFraction gauge
-	GCSys         gauge
-	HeapAlloc     gauge
-	HeapIdle      gauge
-	HeapInuse     gauge
-	HeapObjects   gauge
-	HeapReleased  gauge
-	HeapSys       gauge
-	LastGC        gauge
-	Lookups       gauge
-	MCacheInuse   gauge
-	MCacheSys     gauge
-	MSpanInuse    gauge
-	MSpanSys      gauge
-	Mallocs       gauge
-	NextGC        gauge
-	NumForcedGC   gauge
-	NumGC         gauge
-	OtherSys      gauge
-	PauseTotalNs  gauge
-	StackInuse    gauge
-	StackSys      gauge
-	Sys           gauge
-	TotalAlloc    gauge
-
-	// Custom
-	PollCount   counter
-	RandomValue gauge
+type agent struct {
+	metrics        *agentconfig.Metrics
+	pollInterval   time.Duration
+	reportInterval time.Duration
+	serverAddr     string
 }
 
-func (m *Metrics) CollectMetrics() error {
+func NewAgent(config *agentconfig.AgentConfig) (*agent, error) {
+	var a agent
+
+	a.metrics = config.Metrics
+	a.pollInterval = config.PollInterval
+	a.reportInterval = config.ReportInterval
+	a.serverAddr = config.ServerAddr
+
+	return &a, nil
+}
+
+func (a *agent) RunJob() {
+
+	m := a.metrics
+
+	//Variable which defines when to send metrics
+	var sendCount int
+
+	var reportCount = 5
+
+	// Cycle to collect and send metrics
+	for {
+
+		time.Sleep(a.pollInterval * time.Second)
+
+		err := collectMetrics(m)
+
+		if err != nil {
+			panic("AA")
+		}
+
+		sendCount++
+
+		if sendCount%reportCount == 0 {
+			sendMetrics(m)
+		}
+	}
+}
+
+func collectMetrics(m *agentconfig.Metrics) error {
 
 	var rtm runtime.MemStats
 	runtime.ReadMemStats(&rtm)
 
-	m.Alloc = gauge(rtm.Alloc)
-	m.BuckHashSys = gauge(rtm.BuckHashSys)
-	m.Frees = gauge(rtm.Frees)
-	m.GCCPUFraction = gauge(rtm.GCCPUFraction)
-	m.GCSys = gauge(rtm.GCSys)
-	m.HeapAlloc = gauge(rtm.HeapAlloc)
-	m.HeapIdle = gauge(rtm.HeapIdle)
-	m.HeapInuse = gauge(rtm.HeapInuse)
-	m.HeapObjects = gauge(rtm.HeapObjects)
-	m.HeapReleased = gauge(rtm.HeapReleased)
-	m.HeapSys = gauge(rtm.HeapSys)
-	m.LastGC = gauge(rtm.LastGC)
-	m.Lookups = gauge(rtm.Lookups)
-	m.MCacheInuse = gauge(rtm.MCacheInuse)
-	m.MCacheSys = gauge(rtm.MCacheSys)
-	m.MSpanInuse = gauge(rtm.MSpanInuse)
-	m.MSpanSys = gauge(rtm.MSpanSys)
-	m.Mallocs = gauge(rtm.Mallocs)
-	m.NextGC = gauge(rtm.NextGC)
-	m.NumForcedGC = gauge(rtm.NumForcedGC)
-	m.NumGC = gauge(rtm.NumGC)
-	m.OtherSys = gauge(rtm.OtherSys)
-	m.PauseTotalNs = gauge(rtm.PauseTotalNs)
-	m.StackInuse = gauge(rtm.StackInuse)
-	m.StackSys = gauge(rtm.StackSys)
-	m.Sys = gauge(rtm.Sys)
-	m.TotalAlloc = gauge(rtm.TotalAlloc)
-	m.PollCount++
-	m.RandomValue = gauge(rand.Float64())
+	m.Alloc = repository.Gauge(rtm.Alloc)
+	m.BuckHashSys = repository.Gauge(rtm.BuckHashSys)
+	m.Frees = repository.Gauge(rtm.Frees)
+	m.GCCPUFraction = repository.Gauge(rtm.GCCPUFraction)
+	m.GCSys = repository.Gauge(rtm.GCSys)
+	m.HeapAlloc = repository.Gauge(rtm.HeapAlloc)
+	m.HeapIdle = repository.Gauge(rtm.HeapIdle)
+	m.HeapInuse = repository.Gauge(rtm.HeapInuse)
+	m.HeapObjects = repository.Gauge(rtm.HeapObjects)
+	m.HeapReleased = repository.Gauge(rtm.HeapReleased)
+	m.HeapSys = repository.Gauge(rtm.HeapSys)
+	m.LastGC = repository.Gauge(rtm.LastGC)
+	m.Lookups = repository.Gauge(rtm.Lookups)
+	m.MCacheInuse = repository.Gauge(rtm.MCacheInuse)
+	m.MCacheSys = repository.Gauge(rtm.MCacheSys)
+	m.MSpanInuse = repository.Gauge(rtm.MSpanInuse)
+	m.MSpanSys = repository.Gauge(rtm.MSpanSys)
+	m.Mallocs = repository.Gauge(rtm.Mallocs)
+	m.NextGC = repository.Gauge(rtm.NextGC)
+	m.NumForcedGC = repository.Gauge(rtm.NumForcedGC)
+	m.NumGC = repository.Gauge(rtm.NumGC)
+	m.OtherSys = repository.Gauge(rtm.OtherSys)
+	m.PauseTotalNs = repository.Gauge(rtm.PauseTotalNs)
+	m.StackInuse = repository.Gauge(rtm.StackInuse)
+	m.StackSys = repository.Gauge(rtm.StackSys)
+	m.Sys = repository.Gauge(rtm.Sys)
+	m.TotalAlloc = repository.Gauge(rtm.TotalAlloc)
+	m.PollCount = m.PollCount + 1
+	m.RandomValue = repository.Gauge(rand.Float64())
 
 	return nil
 }
 
-func (m *Metrics) SendMetrics() error {
+func sendMetrics(m *agentconfig.Metrics) error {
 
 	metrics := reflect.ValueOf(m)
 
@@ -99,31 +115,38 @@ func (m *Metrics) SendMetrics() error {
 		Mvalue := metrics.Elem().Field(i)
 		Mtype := reflect.ValueOf(metrics.Elem().Field(i).Type().Name())
 
-		switch fmt.Sprint(Mtype) {
-		case "counter":
-			sendMetric("counter", Mkey, Mvalue)
-		case "gauge":
-			sendMetric("gauge", Mkey, Mvalue)
+		err := sendMetric(Mtype, Mkey, Mvalue)
+
+		if err != nil {
+			//
+			return err
 		}
+
 	}
 
 	return nil
 }
 
-func sendMetric(mtype string, mname reflect.Value, mvalue reflect.Value) {
+func sendMetric(mtype reflect.Value, mname reflect.Value, mvalue reflect.Value) error {
 
 	client := &http.Client{}
 
 	url := fmt.Sprint("http://localhost:8080", update, mtype, "/", mname, "/", mvalue)
 
+	fmt.Println(url)
+
 	request, err := http.NewRequest(http.MethodPost, url, nil)
 	if err != nil {
-		panic(err)
+		//
+		return err
 	}
 
 	response, err := client.Do(request)
 	if err != nil {
-		panic(err)
+		//
+		return err
 	}
 	defer response.Body.Close()
+
+	return nil
 }

@@ -1,44 +1,19 @@
 package main
 
 import (
-	"time"
-
+	"github.com/lena-zima/golang-metrics-project/config/agentconfig"
 	"github.com/lena-zima/golang-metrics-project/internal/agent"
 )
 
-const (
-	pollInterval   time.Duration = 2
-	reportInterval time.Duration = 10
-	reportCount    int           = 5
-	ServerAddr     string        = "http://localhost:8080"
-	ContentType    string        = "text/plain"
-)
-
 func main() {
+	conf := agentconfig.GetConfig()
 
-	// Step 1. Initiate metrics
-	var m agent.Metrics
+	a, err := agent.NewAgent(conf)
 
-	// Step 2. Initiate Config
-	// TODO
+	a.RunJob()
 
-	// Step 3. Operate metrics
-
-	// Variable which defines when to send metrics
-	var sendCount int
-
-	// Cycle to collect and send metrics
-	for {
-
-		time.Sleep(pollInterval * time.Second)
-
-		m.CollectMetrics()
-
-		sendCount++
-
-		if sendCount%reportCount == 0 {
-			m.SendMetrics()
-		}
+	if err != nil {
+		panic("AA")
 	}
 
 }
