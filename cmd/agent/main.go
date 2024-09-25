@@ -8,12 +8,8 @@ import (
 func main() {
 	conf := agentconfig.GetConfig()
 
-	a, err := agent.NewAgent(conf)
+	a, _ := agent.NewAgent(conf)
 
 	a.RunJob()
-
-	if err != nil {
-		panic("AA")
-	}
 
 }
