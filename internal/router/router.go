@@ -33,7 +33,7 @@ func StartServer(r *chi.Mux) error {
 	err := http.ListenAndServe(`:8080`, r)
 
 	if err != nil {
-		log.Printf("failed to get server config: ", err)
+		log.Printf("failed to get server config: %e", err)
 		return err
 	}
 

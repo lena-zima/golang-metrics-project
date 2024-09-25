@@ -119,7 +119,7 @@ func sendMetrics(m *agentconfig.Metrics) error {
 		err := sendMetric(Mtype, Mkey, Mvalue)
 
 		if err != nil {
-			log.Printf("failed to send metric: ", err)
+			log.Printf("failed to send metric: %e", err)
 			return err
 		}
 
@@ -136,13 +136,13 @@ func sendMetric(mtype reflect.Value, mname reflect.Value, mvalue reflect.Value) 
 
 	request, err := http.NewRequest(http.MethodPost, url, nil)
 	if err != nil {
-		log.Printf("failed to send request to server: ", err)
+		log.Printf("failed to send request to server: %e", err)
 		return err
 	}
 
 	response, err := client.Do(request)
 	if err != nil {
-		log.Printf("failed to send request to server: ", err)
+		log.Printf("failed to send request to server: %e", err)
 		return err
 	}
 	defer response.Body.Close()

@@ -20,7 +20,7 @@ func GetConfig() (*ServerConfig, error) {
 	conf.Repo = repo
 
 	if err != nil {
-		log.Printf("err while repo creation: ", err)
+		log.Printf("err while repo creation: %e", err)
 		return nil, err
 	}
 

@@ -12,13 +12,13 @@ func main() {
 	conf, err := serverconfig.GetConfig()
 
 	if err != nil {
-		log.Fatalf("failed to get server config", err)
+		log.Fatalf("failed to get server config %e", err)
 	}
 
 	r, err := router.NewServer(conf)
 
 	if err != nil {
-		log.Fatalf("failed to create a server", err)
+		log.Fatalf("failed to create a server %e", err)
 	}
 
 	router.StartServer(r)
