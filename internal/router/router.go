@@ -1,6 +1,8 @@
 package router
 
 import (
+	"net/http"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/lena-zima/golang-metrics-project/config/serverconfig"
 	"github.com/lena-zima/golang-metrics-project/internal/handlers"
@@ -11,7 +13,7 @@ type server struct {
 	repo repository.Repository
 }
 
-func StartServer(conf *serverconfig.ServerConfig) *chi.Mux {
+func NewServer(conf *serverconfig.ServerConfig) (*chi.Mux, error) {
 
 	var serv server
 	serv.repo = conf.Repo
@@ -22,5 +24,14 @@ func StartServer(conf *serverconfig.ServerConfig) *chi.Mux {
 	r.Get("/value/{metricType}/{metricName}", handlers.GetHandler(serv.repo))
 	r.Post("/update/{metricType}/{metricName}/{metricValue}", handlers.PostHandler(serv.repo))
 
-	return r
+	return r, nil
+}
+
+func StartServer(r *chi.Mux) {
+
+	err := http.ListenAndServe(`:8080`, r)
+
+	if err != nil {
+		panic("AA")
+	}
 }
