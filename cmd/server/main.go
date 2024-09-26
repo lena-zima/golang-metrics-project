@@ -17,7 +17,7 @@ func main() {
 
 	srvEnv, srvEnvExists := os.LookupEnv("ADDRESS")
 
-	if srvEnvExists == true {
+	if srvEnvExists {
 		*srvAddr = srvEnv
 	}
 

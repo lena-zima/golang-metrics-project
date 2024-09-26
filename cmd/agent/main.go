@@ -20,13 +20,13 @@ func main() {
 
 	srvEnv, srvEnvExists := os.LookupEnv("ADDRESS")
 
-	if srvEnvExists == true {
+	if srvEnvExists {
 		*srvAddr = srvEnv
 	}
 
 	repEnv, repEnvExists := os.LookupEnv("ADDRESS")
 
-	if repEnvExists == true {
+	if repEnvExists {
 		var err error
 		*repInt, err = strconv.Atoi(repEnv)
 
@@ -37,7 +37,7 @@ func main() {
 
 	pollEnv, pollEnvExists := os.LookupEnv("ADDRESS")
 
-	if pollEnvExists == true {
+	if pollEnvExists {
 		var err error
 		*pollInt, err = strconv.Atoi(pollEnv)
 
