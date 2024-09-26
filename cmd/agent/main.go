@@ -16,7 +16,7 @@ func main() {
 
 	flag.Parse()
 
-	conf, err := agentconfig.GetConfig(*srvAddr, *repInt, *pollInt)
+	conf, err := agentconfig.GetConfig("http://"+*srvAddr, *repInt, *pollInt)
 
 	if err != nil {
 		log.Fatalf("failed to get agent config %e", err)

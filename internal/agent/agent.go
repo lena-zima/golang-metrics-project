@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"reflect"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/lena-zima/golang-metrics-project/config/agentconfig"
@@ -41,8 +42,6 @@ func NewAgent(config *agentconfig.AgentConfig) (*agent, error) {
 
 func (a *agent) RunJob() {
 
-	m := a.metrics
-
 	//Variable which defines when to send metrics
 	var sendCount int
 
@@ -52,7 +51,7 @@ func (a *agent) RunJob() {
 	for {
 		time.Sleep(time.Second * time.Duration(a.pollInterval))
 
-		err := collectMetrics(m)
+		err := a.collectMetrics()
 
 		if err != nil {
 			log.Printf("failed to get agent metrics: %e", err)
@@ -61,12 +60,14 @@ func (a *agent) RunJob() {
 		sendCount++
 
 		if sendCount%reportCount == 0 {
-			sendMetrics(m)
+			a.sendMetrics()
 		}
 	}
 }
 
-func collectMetrics(m *agentconfig.Metrics) error {
+func (a *agent) collectMetrics() error {
+
+	var m = a.metrics
 
 	var rtm runtime.MemStats
 	runtime.ReadMemStats(&rtm)
@@ -104,7 +105,9 @@ func collectMetrics(m *agentconfig.Metrics) error {
 	return nil
 }
 
-func sendMetrics(m *agentconfig.Metrics) error {
+func (a *agent) sendMetrics() error {
+
+	var m = a.metrics
 
 	metrics := reflect.ValueOf(m)
 
@@ -113,9 +116,10 @@ func sendMetrics(m *agentconfig.Metrics) error {
 	for i := 0; i < metrics.Elem().NumField(); i++ {
 		Mkey := reflect.ValueOf(metricsType.Elem().Field(i).Name)
 		Mvalue := metrics.Elem().Field(i)
-		Mtype := reflect.ValueOf(metrics.Elem().Field(i).Type().Name())
+		Mtype := reflect.ValueOf(metrics.Elem().Field(i).Type().Name()).String()
+		Mtype = strings.ToLower(Mtype)
 
-		err := sendMetric(Mtype, Mkey, Mvalue)
+		err := a.sendMetric(Mtype, Mkey, Mvalue)
 
 		if err != nil {
 			log.Printf("failed to send metric: %e", err)
@@ -127,11 +131,11 @@ func sendMetrics(m *agentconfig.Metrics) error {
 	return nil
 }
 
-func sendMetric(mtype reflect.Value, mname reflect.Value, mvalue reflect.Value) error {
+func (a *agent) sendMetric(mtype string, mname reflect.Value, mvalue reflect.Value) error {
 
 	client := &http.Client{}
 
-	url := fmt.Sprint("http://localhost:8080", update, mtype, "/", mname, "/", mvalue)
+	url := fmt.Sprint(a.serverAddr, update, mtype, "/", mname, "/", mvalue)
 
 	request, err := http.NewRequest(http.MethodPost, url, nil)
 	if err != nil {
