@@ -24,7 +24,7 @@ func main() {
 		*srvAddr = srvEnv
 	}
 
-	repEnv, repEnvExists := os.LookupEnv("ADDRESS")
+	repEnv, repEnvExists := os.LookupEnv("REPORT_INTERVAL")
 
 	if repEnvExists {
 		var err error
@@ -35,7 +35,7 @@ func main() {
 		}
 	}
 
-	pollEnv, pollEnvExists := os.LookupEnv("ADDRESS")
+	pollEnv, pollEnvExists := os.LookupEnv("POLL_INTERVAL")
 
 	if pollEnvExists {
 		var err error
