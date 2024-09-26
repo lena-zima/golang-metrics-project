@@ -1,10 +1,7 @@
 package main
 
 import (
-	"flag"
 	"log"
-	"os"
-	"strconv"
 
 	"github.com/lena-zima/golang-metrics-project/config/agentconfig"
 	"github.com/lena-zima/golang-metrics-project/internal/agent"
@@ -12,41 +9,7 @@ import (
 
 func main() {
 
-	srvAddr := flag.String("a", "localhost:8080", "server endpoint address")
-	repInt := flag.Int("r", 10, "report interval")
-	pollInt := flag.Int("p", 2, "poll interval")
-
-	flag.Parse()
-
-	srvEnv, srvEnvExists := os.LookupEnv("ADDRESS")
-
-	if srvEnvExists {
-		*srvAddr = srvEnv
-	}
-
-	repEnv, repEnvExists := os.LookupEnv("REPORT_INTERVAL")
-
-	if repEnvExists {
-		var err error
-		*repInt, err = strconv.Atoi(repEnv)
-
-		if err != nil {
-			log.Printf("failed to convert env variable %e", err)
-		}
-	}
-
-	pollEnv, pollEnvExists := os.LookupEnv("POLL_INTERVAL")
-
-	if pollEnvExists {
-		var err error
-		*pollInt, err = strconv.Atoi(pollEnv)
-
-		if err != nil {
-			log.Printf("failed to convert env variable %e", err)
-		}
-	}
-
-	conf, err := agentconfig.GetConfig("http://"+*srvAddr, *repInt, *pollInt)
+	conf, err := agentconfig.GetConfig()
 
 	if err != nil {
 		log.Fatalf("failed to get agent config %e", err)

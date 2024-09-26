@@ -1,6 +1,13 @@
 package agentconfig
 
 import (
+	"errors"
+	"flag"
+	"fmt"
+	"log"
+	"os"
+	"strconv"
+
 	"github.com/lena-zima/golang-metrics-project/internal/repository"
 )
 
@@ -49,14 +56,87 @@ type Metrics struct {
 	RandomValue repository.Gauge
 }
 
-func GetConfig(serv string, rep, poll int) (*AgentConfig, error) {
+func GetConfig() (*AgentConfig, error) {
 
 	var conf AgentConfig
 
 	conf.Metrics = initializeMetrics()
-	conf.PollInterval = poll
-	conf.ReportInterval = rep
-	conf.ServerAddr = serv
+
+	//Server Address
+	srvAddr, err := getEnv("srvAddr")
+
+	if err != nil {
+		log.Printf("failed to get server address env: %e", err)
+	}
+
+	conf.ServerAddr = "http://" + srvAddr
+
+	if srvAddr == "" {
+		srvAddr, err = getFlag("srvAddr")
+		conf.ServerAddr = "http://" + srvAddr
+
+		if err != nil {
+			log.Printf("failed to get server address flag: %e", err)
+		}
+	}
+
+	// pollInt
+
+	pollInt, err := getEnv("pollInt")
+
+	fmt.Printf(pollInt)
+
+	if err != nil {
+		log.Printf("failed to get poll interval env: %e", err)
+	}
+
+	if pollInt == "" {
+		pollInt, err = getFlag("pollInt")
+
+		if err != nil {
+			log.Printf("failed to get poll interval flag: %e", err)
+		}
+
+		conf.PollInterval, err = strconv.Atoi(pollInt)
+
+		if err != nil {
+			log.Printf("failed to get poll interval flag: %e", err)
+		}
+	} else {
+		conf.PollInterval, err = strconv.Atoi(pollInt)
+
+		if err != nil {
+			log.Printf("failed to get poll interval env: %e", err)
+		}
+	}
+
+	//repInt
+
+	repInt, err := getEnv("repInt")
+
+	if err != nil {
+		log.Printf("failed to get rep interval env: %e", err)
+	}
+
+	if repInt == "" {
+		repInt, err = getFlag("repInt")
+
+		if err != nil {
+			log.Printf("failed to get poll interval flag: %e", err)
+		}
+
+		conf.ReportInterval, err = strconv.Atoi(repInt)
+
+		if err != nil {
+			log.Printf("failed to get poll interval flag: %e", err)
+		}
+	} else {
+		conf.ReportInterval, err = strconv.Atoi(repInt)
+
+		if err != nil {
+			log.Printf("failed to get rep interval env: %e", err)
+		}
+	}
 
 	return &conf, nil
 }
@@ -97,4 +177,54 @@ func initializeMetrics() *Metrics {
 	m.RandomValue = repository.Gauge(0)
 
 	return &m
+}
+
+func getEnv(name string) (string, error) {
+
+	switch name {
+	case "srvAddr":
+		srvEnv, srvEnvExists := os.LookupEnv("ADDRESS")
+		if srvEnvExists {
+			return srvEnv, nil
+		}
+	case "pollInt":
+		repEnv, repEnvExists := os.LookupEnv("REPORT_INTERVAL")
+
+		if repEnvExists {
+			return repEnv, nil
+		}
+	case "repInt":
+		pollEnv, pollEnvExists := os.LookupEnv("POLL_INTERVAL")
+
+		if pollEnvExists {
+			return pollEnv, nil
+		}
+	default:
+		err := errors.New("unknown env")
+		log.Printf("env parsing error: %e", err)
+		return "", err
+	}
+	return "", nil
+}
+
+func getFlag(name string) (string, error) {
+	switch name {
+	case "srvAddr":
+		srvAddr := flag.String("a", "localhost:8080", "server endpoint address")
+		flag.Parse()
+		return *srvAddr, nil
+	case "pollInt":
+		pollInt := flag.String("p", "2", "poll interval")
+		flag.Parse()
+		return *pollInt, nil
+	case "repInt":
+		repInt := flag.String("r", "10", "report interval")
+		flag.Parse()
+		return *repInt, nil
+	default:
+		err := errors.New("unknown flag")
+		log.Printf("env parsing flags: %e", err)
+		return "", err
+	}
+
 }
