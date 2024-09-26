@@ -45,7 +45,7 @@ func (a *agent) RunJob() {
 	//Variable which defines when to send metrics
 	var sendCount int
 
-	var reportCount = 5
+	var reportCount = a.reportInterval / a.pollInterval
 
 	// Cycle to collect and send metrics
 	for {
