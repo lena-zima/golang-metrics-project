@@ -14,7 +14,7 @@ func main() {
 	repo, err := memstorage.NewMemStorage()
 
 	if err != nil {
-		log.Printf("err while repo creation: %e", err)
+		log.Fatalf("err while repo creation: %e", err)
 	}
 
 	conf, err := serverconfig.GetConfig()
@@ -29,12 +29,12 @@ func main() {
 		log.Fatalf("failed to create a router %e", err)
 	}
 
-	serv, err := server.NewServer(conf, repo, router)
+	serverInstance, err := server.NewServer(conf, repo, router)
 
 	if err != nil {
 		log.Fatalf("failed to create a router %e", err)
 	}
 
-	serv.RunJob()
+	serverInstance.RunJob()
 
 }

@@ -1,6 +1,5 @@
 package memstorage
 
-/*
 import (
 	"testing"
 
@@ -8,35 +7,34 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestAddGauge(t *testing.T) {
+func TestPostGauge(t *testing.T) {
+	stor, _ := NewMemStorage()
 
 	tests := []struct {
 		name       string
 		gaugeName  string
 		gaugeValue repository.Gauge
-		result     repository.Gauge
+		expected   repository.Gauge
 	}{
 		{
-			name:       "Test simple gauge 1",
-			gaugeName:  "test",
+			name:       "gauge 1.1",
+			gaugeName:  "gauge1.1",
 			gaugeValue: 1.1,
-			result:     1.1,
+			expected:   1.1,
 		},
 		{
-			name:       "Test simple gauge 2",
-			gaugeName:  "test2",
-			gaugeValue: 12.12,
-			result:     12.12,
+			name:       "gauge 1.2345",
+			gaugeName:  "gauge1.2345",
+			gaugeValue: 1.2345,
+			expected:   1.2345,
 		},
 	}
+
 	for _, test := range tests {
-
-		var someStorage MemStorage
-
-		someStorage.GaugeMetrics = make(map[string]repository.Gauge, 0)
-
-		someStorage.PostGauge(test.gaugeName, test.gaugeValue)
-		got := float64(someStorage.GaugeMetrics[test.gaugeName])
-		assert.Equal(t, got, test.result)
+		t.Run(test.name, func(t *testing.T) {
+			stor.PostGauge(test.gaugeName, test.gaugeValue)
+			got := stor.gaugeMetrics[test.gaugeName]
+			assert.Equal(t, got, test.expected)
+		})
 	}
-}*/
+}

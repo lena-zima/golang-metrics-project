@@ -11,10 +11,6 @@ type memStorage struct {
 }
 
 // Initiate new memory storage
-// Input: ctx context.Context - ???
-// Input: p *NewMemStorageParams - storage parameters
-// Output: *MemStorage - metrics storage in memory
-// Output: error - error while memory storage creation
 func NewMemStorage() (*memStorage, error) {
 
 	// define variable for new memory storage
