@@ -15,12 +15,12 @@ func main() {
 		log.Fatalf("failed to get agent config %e", err)
 	}
 
-	a, err := agent.NewAgent(conf)
+	agentInstance, err := agent.NewAgent(conf)
 
 	if err != nil {
 		log.Fatalf("failed to create agent %e", err)
 	}
 
-	a.RunJob()
+	agentInstance.RunJob()
 
 }

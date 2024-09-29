@@ -1,80 +1,63 @@
 package serverconfig
 
 import (
-	"errors"
 	"flag"
 	"log"
-	"os"
 
-	"github.com/lena-zima/golang-metrics-project/internal/repository"
-	"github.com/lena-zima/golang-metrics-project/internal/repository/memstorage"
+	"github.com/caarlos0/env"
 )
 
 type ServerConfig struct {
-	Repo     repository.Repository
-	ServAddr string
+	ServerAddr string
+}
+
+type vars struct {
+	srvAddr string `env:"ADDRESS"`
 }
 
 func GetConfig() (*ServerConfig, error) {
 
 	var conf ServerConfig
 
-	var repo, err = memstorage.NewMemStorage()
+	envs, err := getEnvs()
 
 	if err != nil {
-		log.Printf("err while repo creation: %e", err)
-		return nil, err
+		log.Printf("error while parsing envs: %e", err)
 	}
 
-	conf.Repo = repo
-
-	srvAddr, err := getEnv("srvAddr")
+	flags, err := getFlags()
 
 	if err != nil {
-		log.Printf("failed to get server address env: %e", err)
+		log.Printf("error while parsing flags: %e", err)
 	}
 
-	conf.ServAddr = srvAddr
-
-	if srvAddr == "" {
-		srvAddr, err = getFlag("srvAddr")
-
-		conf.ServAddr = srvAddr
-
-		if err != nil {
-			log.Printf("failed to get server address flag: %e", err)
-		}
+	if envs.srvAddr == "" {
+		conf.ServerAddr = flags.srvAddr
 	}
 
 	return &conf, err
 }
 
-func getEnv(name string) (string, error) {
+func getEnvs() (*vars, error) {
 
-	switch name {
-	case "srvAddr":
-		srvEnv, srvEnvExists := os.LookupEnv("ADDRESS")
-		if srvEnvExists {
-			return srvEnv, nil
-		}
-	default:
-		err := errors.New("unknown env")
-		log.Printf("env parsing error: %e", err)
-		return "", err
+	var envs vars
+
+	err := env.Parse(&envs)
+
+	if err != nil {
+		log.Printf("error while parsing envs: %e", err)
 	}
-	return "", nil
+
+	return &envs, err
 }
 
-func getFlag(name string) (string, error) {
-	switch name {
-	case "srvAddr":
-		srvAddr := flag.String("a", "localhost:8080", "server endpoint address")
-		flag.Parse()
-		return *srvAddr, nil
-	default:
-		err := errors.New("unknown flag")
-		log.Printf("env parsing flags: %e", err)
-		return "", err
-	}
+func getFlags() (*vars, error) {
+
+	var flags vars
+
+	flag.StringVar(&flags.srvAddr, "a", "localhost:8080", "server endpoint address")
+	flag.Parse()
+
+	return &flags, nil
 
 }
