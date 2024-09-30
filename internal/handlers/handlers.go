@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 
@@ -131,7 +132,11 @@ func PostHandler(repo repository.Repository) http.HandlerFunc {
 				return
 			}
 
-			repo.PostGauge(metricName, repository.Gauge(value))
+			err = repo.PostGauge(metricName, repository.Gauge(value))
+
+			if err != nil {
+				log.Printf("error while posting a gauge: %e", err)
+			}
 
 			w.WriteHeader(http.StatusOK)
 
@@ -143,7 +148,11 @@ func PostHandler(repo repository.Repository) http.HandlerFunc {
 				return
 			}
 
-			repo.PostCounter(metricName, repository.Counter(value))
+			err = repo.PostCounter(metricName, repository.Counter(value))
+
+			if err != nil {
+				log.Printf("error while posting a counter: %e", err)
+			}
 
 			w.WriteHeader(http.StatusOK)
 
