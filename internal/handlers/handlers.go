@@ -15,150 +15,158 @@ const (
 	counter = "counter"
 )
 
-func GetAllHandler(repo repository.Repository) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		gauges, counters, err := repo.GetAll()
+type Handler struct {
+	Repo repository.Repository
+}
+
+func NewHandler(repo repository.Repository) (*Handler, error) {
+	var h Handler
+	h.Repo = repo
+	return &h, nil
+}
+
+func (h *Handler) GetAllHandler(w http.ResponseWriter, r *http.Request) {
+	repo := h.Repo
+	gauges, counters, err := repo.GetAll()
+
+	if err != nil {
+		http.Error(w, "Failed to get metrics from store", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Header().Set("Content-Type", "text/html")
+	w.Write([]byte("<html><body><h1>Metrics</h1><ul>"))
+
+	for k, v := range gauges {
+		w.Write([]byte(fmt.Sprintf("<li>Gauge: %s = %g</li>", k, v)))
+	}
+
+	for k, v := range counters {
+		w.Write([]byte(fmt.Sprintf("<li>Counter: %s = %d</li>", k, v)))
+	}
+
+	w.Write([]byte("</ul></body></html>"))
+
+}
+
+func (h *Handler) GetHandler(w http.ResponseWriter, r *http.Request) {
+
+	repo := h.Repo
+
+	var (
+		metricType = chi.URLParam(r, "metricType")
+		metricName = chi.URLParam(r, "metricName")
+	)
+
+	if metricType == "" {
+		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	switch metricType {
+	case gauge:
+
+		value, err := repo.GetGauge(metricName)
 
 		if err != nil {
-			http.Error(w, "Failed to get metrics from store", http.StatusInternalServerError)
+			http.Error(w, "Failed to get metric from store", http.StatusInternalServerError)
 			return
 		}
 
-		w.WriteHeader(http.StatusOK)
-		w.Header().Set("Content-Type", "text/html")
-		w.Write([]byte("<html><body><h1>Metrics</h1><ul>"))
-
-		for k, v := range gauges {
-			w.Write([]byte(fmt.Sprintf("<li>Gauge: %s = %g</li>", k, v)))
-		}
-
-		for k, v := range counters {
-			w.Write([]byte(fmt.Sprintf("<li>Counter: %s = %d</li>", k, v)))
-		}
-
-		w.Write([]byte("</ul></body></html>"))
-
-	}
-}
-
-func GetHandler(repo repository.Repository) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-
-		var (
-			metricType = chi.URLParam(r, "metricType")
-			metricName = chi.URLParam(r, "metricName")
-		)
-
-		if metricType == "" {
+		if value == nil {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
 
-		switch metricType {
-		case gauge:
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(fmt.Sprintf("%v", *value)))
+		return
 
-			value, err := repo.GetGauge(metricName)
+	case counter:
 
-			if err != nil {
-				http.Error(w, "Failed to get metric from store", http.StatusInternalServerError)
-				return
-			}
+		value, err := repo.GetCounter(metricName)
 
-			if value == nil {
-				w.WriteHeader(http.StatusNotFound)
-				return
-			}
-
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(fmt.Sprintf("%v", *value)))
+		if err != nil {
+			http.Error(w, "Failed to get metric from store", http.StatusInternalServerError)
 			return
-
-		case counter:
-
-			value, err := repo.GetCounter(metricName)
-
-			if err != nil {
-				http.Error(w, "Failed to get metric from store", http.StatusInternalServerError)
-				return
-			}
-
-			if value == nil {
-				w.WriteHeader(http.StatusNotFound)
-				return
-			}
-
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(fmt.Sprintf("%v", *value)))
-			return
-
-		default:
-			w.WriteHeader(http.StatusBadRequest)
 		}
 
+		if value == nil {
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(fmt.Sprintf("%v", *value)))
+		return
+
+	default:
+		w.WriteHeader(http.StatusBadRequest)
 	}
+
 }
 
-func PostHandler(repo repository.Repository) http.HandlerFunc {
+func (h *Handler) PostHandler(w http.ResponseWriter, r *http.Request) {
 
-	return func(w http.ResponseWriter, r *http.Request) {
+	repo := h.Repo
 
-		var (
-			metricType  = chi.URLParam(r, "metricType")
-			metricName  = chi.URLParam(r, "metricName")
-			metricValue = chi.URLParam(r, "metricValue")
-		)
+	var (
+		metricType  = chi.URLParam(r, "metricType")
+		metricName  = chi.URLParam(r, "metricName")
+		metricValue = chi.URLParam(r, "metricValue")
+	)
 
-		if metricType != gauge && metricType != counter {
-			http.Error(w, "Unknown metric type", http.StatusNotImplemented)
-			return
-		}
+	if metricType != gauge && metricType != counter {
+		http.Error(w, "Unknown metric type", http.StatusNotImplemented)
+		return
+	}
 
-		if metricName == "" {
-			http.Error(w, "Unknown metric name", http.StatusNotFound)
-			return
-		}
+	if metricName == "" {
+		http.Error(w, "Unknown metric name", http.StatusNotFound)
+		return
+	}
 
-		if metricValue == "" {
-			http.Error(w, "Empty metric value", http.StatusNotFound)
-			return
-		}
+	if metricValue == "" {
+		http.Error(w, "Empty metric value", http.StatusNotFound)
+		return
+	}
 
-		switch metricType {
-		case gauge:
-			value, err := strconv.ParseFloat(metricValue, 64)
+	switch metricType {
+	case gauge:
+		value, err := strconv.ParseFloat(metricValue, 64)
 
-			if err != nil {
-				w.WriteHeader(http.StatusBadRequest)
-				return
-			}
-
-			err = repo.PostGauge(metricName, repository.Gauge(value))
-
-			if err != nil {
-				log.Printf("error while posting a gauge: %e", err)
-			}
-
-			w.WriteHeader(http.StatusOK)
-
-		case counter:
-			value, err := strconv.ParseInt(metricValue, 10, 64)
-
-			if err != nil {
-				w.WriteHeader(http.StatusBadRequest)
-				return
-			}
-
-			err = repo.PostCounter(metricName, repository.Counter(value))
-
-			if err != nil {
-				log.Printf("error while posting a counter: %e", err)
-			}
-
-			w.WriteHeader(http.StatusOK)
-
-		default:
+		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
+			return
 		}
+
+		err = repo.PostGauge(metricName, repository.Gauge(value))
+
+		if err != nil {
+			log.Printf("error while posting a gauge: %e", err)
+		}
+
+		w.WriteHeader(http.StatusOK)
+
+	case counter:
+		value, err := strconv.ParseInt(metricValue, 10, 64)
+
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		err = repo.PostCounter(metricName, repository.Counter(value))
+
+		if err != nil {
+			log.Printf("error while posting a counter: %e", err)
+		}
+
+		w.WriteHeader(http.StatusOK)
+
+	default:
+		w.WriteHeader(http.StatusBadRequest)
 	}
 
 }

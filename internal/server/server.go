@@ -10,24 +10,24 @@ import (
 )
 
 type server struct {
-	repo    repository.Repository
-	addr    string
-	handler *chi.Mux
+	repo   repository.Repository
+	addr   string
+	router *chi.Mux
 }
 
-func NewServer(config *serverconfig.ServerConfig, repo repository.Repository, handler *chi.Mux) (*server, error) {
+func NewServer(config *serverconfig.ServerConfig, repo repository.Repository, router *chi.Mux) (*server, error) {
 	var serv server
 
 	serv.repo = repo
 	serv.addr = config.ServerAddr
-	serv.handler = handler
+	serv.router = router
 
 	return &serv, nil
 }
 
 func (serv *server) RunJob() error {
 
-	err := http.ListenAndServe(serv.addr, serv.handler)
+	err := http.ListenAndServe(serv.addr, serv.router)
 
 	if err != nil {
 		log.Printf("failed to get server config: %e", err)
