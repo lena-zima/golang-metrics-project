@@ -227,8 +227,6 @@ func (a *agent) sendMetric(mtype string, mname reflect.Value, mvalue reflect.Val
 
 	url := fmt.Sprintf("%s%s%s/%s/%v", a.serverAddr, update, mtype, mname, mvalue)
 
-	fmt.Print(url)
-
 	request, err := http.NewRequest(http.MethodPost, url, nil)
 	if err != nil {
 		log.Printf("failed to send request to server: %e", err)
