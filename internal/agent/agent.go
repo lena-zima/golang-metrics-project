@@ -1,6 +1,7 @@
 package agent
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"math/rand"
@@ -86,6 +87,11 @@ func (a *agent) RunJob() {
 	//Variable which defines when to send metrics
 	var sendCount int
 
+	if a.pollInterval == 0 {
+		err := errors.New("polling interval cannot be 0")
+		log.Printf("%e", err)
+	}
+
 	var reportCount = a.reportInterval / a.pollInterval
 
 	// Cycle to collect and send metrics
@@ -99,6 +105,11 @@ func (a *agent) RunJob() {
 		}
 
 		sendCount++
+
+		if reportCount == 0 {
+			err := errors.New("reporting interval cannot be 0")
+			log.Printf("%e", err)
+		}
 
 		if sendCount%reportCount == 0 {
 			a.sendMetrics()
