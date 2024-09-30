@@ -3,7 +3,6 @@ package agentconfig
 import (
 	"flag"
 	"log"
-	"os"
 
 	"github.com/caarlos0/env"
 )
@@ -18,7 +17,7 @@ func GetConfig() (*AgentConfig, error) {
 
 	var conf AgentConfig
 
-	os.Setenv("ADDRESS", "localhost:12346")
+	//os.Setenv("ADDRESS", "localhost:12346")
 
 	envs, err := getEnvs()
 
