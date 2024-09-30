@@ -8,16 +8,14 @@ import (
 )
 
 type ServerConfig struct {
-	ServerAddr string
-}
-
-type vars struct {
-	srvAddr string `env:"ADDRESS"`
+	ServerAddr string `env:"ADDRESS"`
 }
 
 func GetConfig() (*ServerConfig, error) {
 
 	var conf ServerConfig
+
+	//os.Setenv("ADDRESS", "localhost:12345")
 
 	envs, err := getEnvs()
 
@@ -31,16 +29,18 @@ func GetConfig() (*ServerConfig, error) {
 		log.Printf("error while parsing flags: %e", err)
 	}
 
-	if envs.srvAddr == "" {
-		conf.ServerAddr = flags.srvAddr
+	if envs.ServerAddr == "" {
+		conf.ServerAddr = flags.ServerAddr
+	} else {
+		conf.ServerAddr = envs.ServerAddr
 	}
 
 	return &conf, err
 }
 
-func getEnvs() (*vars, error) {
+func getEnvs() (*ServerConfig, error) {
 
-	var envs vars
+	var envs ServerConfig
 
 	err := env.Parse(&envs)
 
@@ -51,11 +51,11 @@ func getEnvs() (*vars, error) {
 	return &envs, err
 }
 
-func getFlags() (*vars, error) {
+func getFlags() (*ServerConfig, error) {
 
-	var flags vars
+	var flags ServerConfig
 
-	flag.StringVar(&flags.srvAddr, "a", "localhost:8080", "server endpoint address")
+	flag.StringVar(&flags.ServerAddr, "a", "localhost:8080", "server endpoint address")
 	flag.Parse()
 
 	return &flags, nil

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/lena-zima/golang-metrics-project/config/agentconfig"
@@ -10,6 +11,8 @@ import (
 func main() {
 
 	conf, err := agentconfig.GetConfig()
+
+	fmt.Print(conf)
 
 	if err != nil {
 		log.Fatalf("failed to get agent config %e", err)

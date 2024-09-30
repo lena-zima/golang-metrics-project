@@ -3,25 +3,22 @@ package agentconfig
 import (
 	"flag"
 	"log"
+	"os"
 
 	"github.com/caarlos0/env"
 )
 
 type AgentConfig struct {
-	PollInterval   int
-	ReportInterval int
-	ServerAddr     string
-}
-
-type vars struct {
-	pollInt int    `env:"POLL_INTERVAL"`
-	repInt  int    `env:"REPORT_INTERVAL"`
-	srvAddr string `env:"ADDRESS"`
+	PollInterval   int    `env:"POLL_INTERVAL"`
+	ReportInterval int    `env:"REPORT_INTERVAL"`
+	ServerAddr     string `env:"ADDRESS"`
 }
 
 func GetConfig() (*AgentConfig, error) {
 
 	var conf AgentConfig
+
+	os.Setenv("ADDRESS", "localhost:12346")
 
 	envs, err := getEnvs()
 
@@ -35,26 +32,32 @@ func GetConfig() (*AgentConfig, error) {
 		log.Printf("error while parsing flags: %e", err)
 	}
 
-	if envs.srvAddr == "" {
-		conf.ServerAddr = flags.srvAddr
+	if envs.ServerAddr == "" {
+		conf.ServerAddr = flags.ServerAddr
+	} else {
+		conf.ServerAddr = envs.ServerAddr
 	}
 
 	conf.ServerAddr = "http://" + conf.ServerAddr
 
-	if envs.pollInt == 0 {
-		conf.PollInterval = flags.pollInt
+	if envs.PollInterval == 0 {
+		conf.PollInterval = flags.PollInterval
+	} else {
+		conf.PollInterval = envs.PollInterval
 	}
 
-	if envs.repInt == 0 {
-		conf.ReportInterval = flags.repInt
+	if envs.ReportInterval == 0 {
+		conf.ReportInterval = flags.ReportInterval
+	} else {
+		conf.ReportInterval = envs.ReportInterval
 	}
 
 	return &conf, err
 }
 
-func getEnvs() (*vars, error) {
+func getEnvs() (*AgentConfig, error) {
 
-	var envs vars
+	var envs AgentConfig
 
 	err := env.Parse(&envs)
 
@@ -65,13 +68,13 @@ func getEnvs() (*vars, error) {
 	return &envs, err
 }
 
-func getFlags() (*vars, error) {
+func getFlags() (*AgentConfig, error) {
 
-	var flags vars
+	var flags AgentConfig
 
-	flag.StringVar(&flags.srvAddr, "a", "localhost:8080", "server endpoint address")
-	flag.IntVar(&flags.pollInt, "p", 2, "poll interval")
-	flag.IntVar(&flags.repInt, "r", 10, "report interval")
+	flag.StringVar(&flags.ServerAddr, "a", "localhost:8080", "server endpoint address")
+	flag.IntVar(&flags.PollInterval, "p", 2, "poll interval")
+	flag.IntVar(&flags.ReportInterval, "r", 10, "report interval")
 
 	flag.Parse()
 
